@@ -36,10 +36,10 @@ function init() {
     canvas_width = canvas.width;
     canvas_height = canvas.height;
 
-    start(level);
+    enter(level);
 }
 
-function start(level) {
+function start(level, infinity) {
     console.log("start");
 
     grid_width = 100;
@@ -81,7 +81,7 @@ function start(level) {
     width = grid_width * col;
     height = grid_height * row;
     x = canvas_width / 2 - width / 2;
-    y = canvas_height / 2 - height / 2;
+    y = canvas_height / 2 - height / 2 + 40;
 
     // color parameters - h
     var color_h_start = getRandomInt(0, 300);
@@ -298,6 +298,7 @@ function start(level) {
     level_text.y = 20;
     level_text.name = "level";
     level_text.shadow = new createjs.Shadow("#000000", 0, 0, 10);
+    main.addChild(level_text);
 
     var move_text = new createjs.Text("Move: " + move, "bold 24px Arial", "#FFFFFF");
     move_text.textAlign = "center";
@@ -305,25 +306,29 @@ function start(level) {
     move_text.y = 80;
     move_text.name = "move";
     move_text.shadow = new createjs.Shadow("#000000", 0, 0, 10);
+    main.addChild(move_text);
 
-    var time_left = Math.floor(time/60/1000) + ":" + Math.floor((time/1000) % 60);
-    var time_text = new createjs.Text("Time: " + time_left, "bold 24px Arial", "#FFFFFF");
-    time_text.textAlign = "center";
-    time_text.x = canvas_width/2;
-    time_text.y = 104;
-    time_text.name = "time";
-    time_text.shadow = new createjs.Shadow("#000000", 0, 0, 10);
-
-    main.addChild(level_text, move_text, time_text);
+    if (!infinity) {
+        var time_left = Math.floor(time/60/1000) + ":" + Math.floor((time/1000) % 60);
+        var time_text = new createjs.Text("Time: " + time_left, "bold 24px Arial", "#FFFFFF");
+        time_text.textAlign = "center";
+        time_text.x = canvas_width/2;
+        time_text.y = 104;
+        time_text.name = "time";
+        time_text.shadow = new createjs.Shadow("#000000", 0, 0, 10);
+        main.addChild(time_text);
+    }
 
     stage.update();
 
     // inteval
-    if (interval == false) {
+    if (interval == false && !infinity) {
         interval = setInterval(function(){
             update(1000);
         }, 1000);
     }
+
+    credit();
 }
 
 function switch_rects(a, b) {
@@ -404,11 +409,25 @@ function end() {
         text.x = canvas_width/2;
         text.y = canvas_height/2 - 50;
         text.name = "text";
-        text.shadow = new createjs.Shadow("#000000", 0, 0, 10);
+        text.shadow = new createjs.Shadow("#000000", 0, 0, 20);
         end.addChild(text);
 
-        end.on("click", function(event) {
-            end.mouseEnabled = false;
+        var button = new createjs.Container();
+        button.x = canvas_width/2 - 100;
+        button.y = canvas_height/2 + 80;
+        end.addChild(button);
+
+        var button_bg = new createjs.Shape();
+        button_bg.graphics.beginFill("#131314").drawRect(0, 0, 200, 80);
+        button_bg.shadow = new createjs.Shadow("#000000", 0, 0, 20);
+        var button_text = new createjs.Text("Retry", "bold 40px Arial", "#FFFFFF");
+        button_text.textAlign = "center";
+        button_text.x = 100;
+        button_text.y = 20;
+        button.addChild(button_bg, button_text);
+
+        button.on("click", function(event) {
+            button.mouseEnabled = false;
             // init();
             location.reload();
         });
@@ -419,8 +438,89 @@ function end() {
             text.Text = "Max level: "+level;
         }
     }
-    end.mouseEnabled = true;
 
+    stage.update();
+
+    credit();
+}
+
+function enter(level) {
+    var enter = stage.getChildByName("enter");
+    if (!enter) {
+        enter = new createjs.Container();
+        enter.name = "enter";
+        stage.addChild(enter);
+
+        var background = new createjs.Shape();
+        background.graphics.beginFill("#151517").drawRect(0, 0, canvas_width, canvas_height);
+        enter.addChild(background);
+
+        var title = new createjs.Text("Color Master", "bold 60px Arial", "#FFFFFF");
+        title.textAlign = "center";
+        title.x = canvas_width/2;
+        title.y = 100;
+        title.name = "title";
+        title.shadow = new createjs.Shadow("#000000", 0, 0, 20);
+        enter.addChild(title);
+
+        var button = new createjs.Container();
+        button.x = canvas_width/2 - 130;
+        button.y = canvas_height/2 - 40;
+        enter.addChild(button);
+
+        var button_bg = new createjs.Shape();
+        button_bg.graphics.beginFill("#131314").drawRect(0, 0, 260, 80);
+        button_bg.shadow = new createjs.Shadow("#000000", 0, 0, 20);
+        var button_text = new createjs.Text("Limited Time", "bold 32px Arial", "#FFFFFF");
+        button_text.textAlign = "center";
+        button_text.x = 130;
+        button_text.y = 20;
+        button.addChild(button_bg, button_text);
+
+        button.on("click", function(event) {
+            start(level);
+        });
+
+        var button_2 = new createjs.Container();
+        button_2.x = canvas_width/2 - 130;
+        button_2.y = canvas_height/2 + 80;
+        enter.addChild(button_2);
+
+        var button_2_bg = new createjs.Shape();
+        button_2_bg.graphics.beginFill("#131314").drawRect(0, 0, 260, 80);
+        button_2_bg.shadow = new createjs.Shadow("#000000", 0, 0, 20);
+        var button_2_text = new createjs.Text("Infinity Mode", "bold 32px Arial", "#FFFFFF");
+        button_2_text.textAlign = "center";
+        button_2_text.x = 130;
+        button_2_text.y = 20;
+        button_2.addChild(button_2_bg, button_2_text);
+
+        button_2.on("click", function(event) {
+            start(level, true);
+        });
+    } else {
+        stage.setChildIndex(enter, stage.getNumChildren()-1);
+    }
+    stage.update();
+    credit();
+}
+
+function credit() {
+    var credit = stage.getChildByName("credit");
+    if (!credit) {
+        credit = new createjs.Text("Color Master by River Liu \u00A9" + new Date().getFullYear(), "20px Arial", "#FFFFFF");
+        credit.textAlign = "center";
+        credit.x = canvas_width/2;
+        credit.y = canvas_height - 40;
+        credit.alpha = 0.2;
+        credit.shadow = new createjs.Shadow("#000000", 0, 0, 10);
+        credit.on("click", function(event) {
+            window.open("http://riverliu.net","_blank");
+        });
+        stage.addChild(credit);
+    } else {
+        stage.setChildIndex(credit, stage.getNumChildren()-1);
+    }
     stage.update();
 }
 
@@ -532,9 +632,9 @@ function shuffle(array, escape) {
             continue;
         }
         count = 0;
-        for (var count = 0; count < 3; count ++) {
+        for (var count = 0; count < 5; count ++) {
             j = getRandomInt(0, i-1);
-            if (!escape.includes(j)) {
+            if (!escape.includes(j) && j != i) {
                 break;
             }
         }
